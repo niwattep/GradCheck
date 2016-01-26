@@ -9,10 +9,9 @@ public class Course {
     final String letterGrade;
 
     private static HashMap<String, Double> gradeTable = new HashMap<String, Double>();
-    private static String[] attemptableGrades = { "A", "B+", "B", "C+", "C",
-            "D+", "D", "F" };
-    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C",
-            "D+", "D", "F", "S", "U" };
+    private static String[] passingGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "S" };
+    private static String[] attemptableGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "F" };
+    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "F", "S", "U" };
 
     static {
         /* setup the static map */
@@ -34,10 +33,14 @@ public class Course {
         this.numUnit = numUnit;
         this.letterGrade = letterGrade;
     }
-    
+
     public String toString() {
+        String retVal = String.format("   %7s, %20s, %2d, %s", id, name, numUnit, letterGrade);
+        /*
         return "Course [id=" + id + ", name=" + name + ", numUnit=" + numUnit + ", letterGrade="
                 + letterGrade + "]";
+                */
+        return retVal;
     }
 
     public static double getGradePointOf(String letterGrade) {
@@ -49,6 +52,10 @@ public class Course {
         }
     }
 
+    public static boolean isPassingGrade(String letterGrade) {
+        return Arrays.asList(passingGrades).contains(letterGrade);
+    }
+    
     public static boolean isAttemptableGrade(String letterGrade) {
         return Arrays.asList(attemptableGrades).contains(letterGrade);
     }
@@ -56,7 +63,7 @@ public class Course {
     public static boolean isGrantedGrade(String letterGrade) {
         return Arrays.asList(grantableGrades).contains(letterGrade);
     }
-    
+
     public static double getGPAX(ArrayList<Course> courses) {
         double GPX = 0.0;
         int CAX = 0;
@@ -67,14 +74,6 @@ public class Course {
                 GPX += gradePoint * course.numUnit;
             }
         }
-        System.out.println("CAX = " + CAX);
-        System.out.println("GPX = " + GPX);
         return GPX / CAX;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(isAttemptableGrade(new String("U")));
-        System.out.println(isAttemptableGrade("W"));
-        System.out.println(isAttemptableGrade("X"));
     }
 }

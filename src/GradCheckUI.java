@@ -1,5 +1,6 @@
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -13,6 +14,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+
+import org.omg.CORBA.UserException;
 
 public class GradCheckUI implements ActionListener {
     private static GradCheckUI instance = new GradCheckUI();
@@ -41,6 +44,14 @@ public class GradCheckUI implements ActionListener {
         mainFrame.setVisible(true);
     }
 
+    private static GradChecklistReport getChecklistReport(Student student) {
+        if (student.majorCode == 26032) {
+            return new MathStatChecklistReport();
+        } else {
+            throw new RuntimeException("Unimplemented major");
+        }
+    }
+    
     public void actionPerformed(ActionEvent event) {
         if (event.getSource() == checkGradeButton) {
             StringReader stringReader = new StringReader(inputTextArea.getText());
@@ -49,12 +60,15 @@ public class GradCheckUI implements ActionListener {
                 Student student = StudentTextReportParser.parseStudentInfo(reader);
                 StringWriter stringWriter = new StringWriter();
                 PrintWriter printWriter = new PrintWriter(stringWriter);
-                GradChecklistReport report = new MathStatChecklistReport();
+                
+                GradChecklistReport report = getChecklistReport(student);
                 report.printReport(printWriter, student);
 
                 String outputDialogName = "Checklist for " + student.name;
 
                 JTextArea outputTextArea = new JTextArea(stringWriter.toString());
+                outputTextArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+                outputTextArea.setEditable(false);
                 JScrollPane outputScrollPane = new JScrollPane(outputTextArea);
                 outputScrollPane.setPreferredSize(new Dimension(700, 500));
 
