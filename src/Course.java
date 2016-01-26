@@ -5,7 +5,7 @@ import java.util.HashMap;
 public class Course {
     final String id;
     final String name;
-    final int numUnit;
+    final int credit;
     final String letterGrade;
 
     private static HashMap<String, Double> gradeTable = new HashMap<String, Double>();
@@ -30,12 +30,12 @@ public class Course {
         super();
         this.id = id;
         this.name = name;
-        this.numUnit = numUnit;
+        this.credit = numUnit;
         this.letterGrade = letterGrade;
     }
 
     public String toString() {
-        String retVal = String.format("   %7s, %20s, %2d, %s", id, name, numUnit, letterGrade);
+        String retVal = String.format("   %7s, %20s, %2d, %s", id, name, credit, letterGrade);
         /*
         return "Course [id=" + id + ", name=" + name + ", numUnit=" + numUnit + ", letterGrade="
                 + letterGrade + "]";
@@ -69,9 +69,9 @@ public class Course {
         int CAX = 0;
         for (Course course : courses) {
             if (Course.isAttemptableGrade(course.letterGrade)) {
-                CAX += course.numUnit;
+                CAX += course.credit;
                 double gradePoint = getGradePointOf(course.letterGrade);
-                GPX += gradePoint * course.numUnit;
+                GPX += gradePoint * course.credit;
             }
         }
         return GPX / CAX;

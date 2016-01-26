@@ -12,6 +12,12 @@ public class MathStatChecklistReport extends GradChecklistReport {
     private static String[] coreCourseIDs = { "2301102", "2301203", "2301333", "2603172",
             "2603213", "2603244", "2603270", "2603312", "2603313", "2603317", "2603318", "2603417",
             "2603490" };
+    private static String[] coreMajorCourseIDs = { "2301204", "2301225", "2301312", "2603336",
+            "2603412", "2603413", "2603430", "2603431", "2603432", "2603433", "2603434", "2603436",
+            "2603460", "2603499", "2900112" };
+    private static String[] electiveMajorCourseIDs = { "2601255", "2603370", "2603376", "2603383",
+            "2603414", "2603437", "2603495", "2301233", "2301336", "2301366", "2301481", "2602395",
+            "2945301", "2945401" };
 
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
@@ -23,9 +29,9 @@ public class MathStatChecklistReport extends GradChecklistReport {
      * @param writer
      * @param courseIDs
      * @param unmatchedCourses
-     * @return true if there is a match, false otherwise
+     * @return number of credits for the course that matches
      */
-    private boolean matchAndPrintOneCourse(PrintWriter writer, String[] courseIDs,
+    private int matchAndPrintOneCourse(PrintWriter writer, String[] courseIDs,
             List<Course> unmatchedCourses) {
         List<Course> theCourses = unmatchedCourses.stream()
                 .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
@@ -34,10 +40,10 @@ public class MathStatChecklistReport extends GradChecklistReport {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
                 writer.println(theCourse);
                 unmatchedCourses.remove(theCourse);
-                return true;
+                return theCourse.credit;
             }
         }
-        return false;
+        return 0;
     }
 
     private void printMissing(PrintWriter writer, String detail) {
@@ -57,25 +63,25 @@ public class MathStatChecklistReport extends GradChecklistReport {
 
         writer.println("Group: General Education");
         writer.println("1. Social Science");
-        if (!matchAndPrintOneCourse(writer, socialGenEdCourseIDs, unmatchedCourses)) {
+        if (matchAndPrintOneCourse(writer, socialGenEdCourseIDs, unmatchedCourses) == 0) {
             printMissing(writer, socialGenEdCourseIDs[0]);
         }
         writer.println("2. Humanity");
-        if (!matchAndPrintOneCourse(writer, humanityGenEdCourseIDs, unmatchedCourses)) {
+        if (matchAndPrintOneCourse(writer, humanityGenEdCourseIDs, unmatchedCourses) == 0) {
             printMissing(writer, "");
         }
         writer.println("3. Science and Math");
-        if (!matchAndPrintOneCourse(writer, scienceMathGenEdCourseIDs, unmatchedCourses)) {
+        if (matchAndPrintOneCourse(writer, scienceMathGenEdCourseIDs, unmatchedCourses) == 0) {
             printMissing(writer, "");
         }
         writer.println("4. Interdisciplinary");
-        if (!matchAndPrintOneCourse(writer, interdisciplinaryGenEdCourseIDs, unmatchedCourses)) {
+        if (matchAndPrintOneCourse(writer, interdisciplinaryGenEdCourseIDs, unmatchedCourses) == 0) {
             printMissing(writer, "");
         }
         writer.println("5. Foreign languages");
         for (String languageGenEdCourseID : languageGenEdCourseIDs) {
             String[] oneCourse = { languageGenEdCourseID };
-            if (!matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses)) {
+            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
                 printMissing(writer, languageGenEdCourseID);
             }
         }
@@ -84,21 +90,41 @@ public class MathStatChecklistReport extends GradChecklistReport {
         writer.println("Group: Departmental Requirements");
         for (String departmentalRequirementCourseID : departmentalRequirementCourseIDs) {
             String[] oneCourse = { departmentalRequirementCourseID };
-            if (!matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses)) {
+            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
                 printMissing(writer, departmentalRequirementCourseID);
             }
         }
         writer.println();
-        
+
         writer.println("Group: Core Courses");
         for (String coreCourseID : coreCourseIDs) {
             String[] oneCourse = { coreCourseID };
-            if (!matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses)) {
+            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
                 printMissing(writer, coreCourseID);
             }
         }
         writer.println();
 
+        writer.println("Group: Core Major Courses");
+        for (String coreMajorCourseID : coreMajorCourseIDs) {
+            String[] oneCourse = { coreMajorCourseID };
+            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
+                printMissing(writer, coreMajorCourseID);
+            }
+        }
+        writer.println();
+
+        int electiveMajorCredits = 0;
+        writer.println("Group: Elective Major Courses (>= 15 credits)");
+        int matchedCredit;
+        do {
+            matchedCredit = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
+            electiveMajorCredits += matchedCredit;
+        } while (matchedCredit != 0);
+        if (electiveMajorCredits < 15) {
+            printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
+        }
+        
         writer.println("Group: Extraneous Courses");
         for (Course unmatchedCourse : unmatchedCourses) {
             writer.println(unmatchedCourse);
