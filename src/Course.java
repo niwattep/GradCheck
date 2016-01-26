@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -9,9 +10,9 @@ public class Course {
 
     private static HashMap<String, Double> gradeTable = new HashMap<String, Double>();
     private static String[] attemptableGrades = { "A", "B+", "B", "C+", "C",
-            "D+", "D", "F", "S", "U" };
-    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C",
             "D+", "D", "F" };
+    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C",
+            "D+", "D", "F", "S", "U" };
 
     static {
         /* setup the static map */
@@ -54,6 +55,21 @@ public class Course {
 
     public static boolean isGrantedGrade(String letterGrade) {
         return Arrays.asList(grantableGrades).contains(letterGrade);
+    }
+    
+    public static double getGPAX(ArrayList<Course> courses) {
+        double GPX = 0.0;
+        int CAX = 0;
+        for (Course course : courses) {
+            if (Course.isAttemptableGrade(course.letterGrade)) {
+                CAX += course.numUnit;
+                double gradePoint = getGradePointOf(course.letterGrade);
+                GPX += gradePoint * course.numUnit;
+            }
+        }
+        System.out.println("CAX = " + CAX);
+        System.out.println("GPX = " + GPX);
+        return GPX / CAX;
     }
 
     public static void main(String[] args) {

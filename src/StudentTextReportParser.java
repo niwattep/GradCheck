@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class StudentTextReportParser {
+    static final String defaultInputFileName = "testcases/MSTAT55_1.FIN.DAT";
+    
     /**
      * Read 8 lines containing a single course information and return the object
      * representing it. If the first line doesn't have the course id, don't read
@@ -41,9 +43,20 @@ public class StudentTextReportParser {
         while (true) {
             Course course = parseCourse(reader);
             if (course == null) {
-                for (int i = 0; i < 22; i = i + 1) { // ignore 22 trailing lines
-                    reader.readLine();
+                /* There are two cases here. Regular semesters or summer semesters.
+                 * Regular semester will have the next line = "CA",
+                 * follow by 21 trailing lines of other info.
+                 * Summer semester will have the next line = empty,
+                 * follow by another empty line.
+                 */
+                if (reader.readLine().trim().equals("CA")) {
+                    for (int i = 0; i < 21; i = i + 1) { // ignore 21 trailing lines
+                        reader.readLine();
+                    }
+                } else {
+                    reader.readLine(); // ignore one line
                 }
+                
                 return courses;
             } else {
                 courses.add(course);
@@ -105,12 +118,18 @@ public class StudentTextReportParser {
     }
 
     public static void main(String[] args) {
+        String inputFileName = defaultInputFileName;
+        if (args.length > 0) {
+            inputFileName = args[0];
+        }
+        
         try {
-            Student student = parseStudentInfo(new BufferedReader(new FileReader(args[0])));
+            Student student = parseStudentInfo(new BufferedReader(new FileReader(inputFileName)));
             System.out.println(student);
             for (Course course : student.getCoursesTaken()) {
                 System.out.println(course);
             }
+            System.out.println("GPAX = " + Course.getGPAX(student.getCoursesTaken()));
         } catch (FileNotFoundException e) {
             System.err.println("File not found:" + args[0]);
         } catch (IOException e) {
