@@ -17,6 +17,14 @@ public class Student {
         this.majorCode = majorCode;
         this.studentId = studentId;
     }
+    
+    public void addCourses(ArrayList<Course> courses) {
+        coursesTaken.addAll(courses);
+    }
+    
+    public ArrayList<Course> getCoursesTaken() {
+        return coursesTaken;
+    }
 
     public String toString() {
         return "Student [name=" + name + ", majorCode=" + majorCode
