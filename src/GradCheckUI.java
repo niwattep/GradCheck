@@ -25,7 +25,7 @@ public class GradCheckUI implements ActionListener {
     public static void main(String[] args) {
         mainFrame = new JFrame("GradCheck Software for 2603483");
         mainFrame.setLayout(new FlowLayout());
-        mainFrame.setPreferredSize(new Dimension(700, 450));
+        mainFrame.setPreferredSize(new Dimension(700, 500));
 
         inputTextArea = new JTextArea(24, 60);
         inputScrollPane = new JScrollPane(inputTextArea);
