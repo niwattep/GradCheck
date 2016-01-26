@@ -111,6 +111,7 @@ public class StudentTextReportParser {
             for (Course course : student.getCoursesTaken()) {
                 System.out.println(course);
             }
+            System.out.println("GPAX = " + Course.getGPAX(student.getCoursesTaken()));
         } catch (FileNotFoundException e) {
             System.err.println("File not found:" + args[0]);
         } catch (IOException e) {
