@@ -2,7 +2,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 public class Course {
-    final int id;
+    final String id;
     final String name;
     final int numUnit;
     final String letterGrade;
@@ -26,12 +26,17 @@ public class Course {
                                   // completeness
     }
 
-    public Course(int id, String name, int numUnit, String letterGrade) {
+    public Course(String id, String name, int numUnit, String letterGrade) {
         super();
         this.id = id;
         this.name = name;
         this.numUnit = numUnit;
         this.letterGrade = letterGrade;
+    }
+    
+    public String toString() {
+        return "Course [id=" + id + ", name=" + name + ", numUnit=" + numUnit + ", letterGrade="
+                + letterGrade + "]";
     }
 
     public static double getGradePointOf(String letterGrade) {
