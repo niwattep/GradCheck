@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class StudentTextReportParser {
+    static final String defaultInputFileName = "testcases/MSTAT55_1.FIN.DAT";
+    
     /**
      * Read 8 lines containing a single course information and return the object
      * representing it. If the first line doesn't have the course id, don't read
@@ -116,7 +118,7 @@ public class StudentTextReportParser {
     }
 
     public static void main(String[] args) {
-        String inputFileName = "testcases/MSTAT55_1.FIN.DAT";
+        String inputFileName = defaultInputFileName;
         if (args.length > 0) {
             inputFileName = args[0];
         }
