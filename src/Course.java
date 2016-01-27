@@ -6,7 +6,7 @@ public class Course {
     final String id;
     final String name;
     final int credit;
-    final String letterGrade;
+    String letterGrade; // can be changed due to the rule about extraneous free electives
 
     private static HashMap<String, Double> gradeTable = new HashMap<String, Double>();
     private static String[] passingGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "S" };

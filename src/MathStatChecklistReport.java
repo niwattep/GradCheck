@@ -13,8 +13,8 @@ public class MathStatChecklistReport extends GradChecklistReport {
             "2603213", "2603244", "2603270", "2603312", "2603313", "2603317", "2603318", "2603417",
             "2603490" };
     private static String[] coreMajorCourseIDs = { "2301204", "2301225", "2301312", "2603336",
-            "2603412", "2603413", "2603430", "2603431", "2603432", "2603433", "2603434", "2603436",
-            "2603460", "2603499", "2900112" };
+            "2603412", "2603413", "2603430", "2603431", "2603432", "2603433", "2603434", "2603435",
+            "2603436", "2603460", "2603499", "2900112" };
     private static String[] electiveMajorCourseIDs = { "2601255", "2603370", "2603376", "2603383",
             "2603414", "2603437", "2603495", "2301233", "2301336", "2301366", "2301481", "2602395",
             "2945301", "2945401" };
@@ -46,11 +46,13 @@ public class MathStatChecklistReport extends GradChecklistReport {
         return 0;
     }
 
-    private int matchAndPrintOneElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
-        List<Course> theCourses = unmatchedCourses
-                .stream()
-                .filter(c -> !c.id.startsWith("26") || c.id.charAt(4) == '0'
-                        || c.id.charAt(4) == '1' || c.id.charAt(4) == '2')
+    private boolean isFreeElective(Course course) {
+        return !course.id.startsWith("26") || course.id.charAt(4) == '0'
+                || course.id.charAt(4) == '1' || course.id.charAt(4) == '2';
+    }
+
+    private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+        List<Course> theCourses = unmatchedCourses.stream().filter(c -> isFreeElective(c))
                 .collect(Collectors.toList());
 
         for (Course theCourse : theCourses) {
@@ -76,7 +78,15 @@ public class MathStatChecklistReport extends GradChecklistReport {
     public void printCurriculumCourses(PrintWriter writer, Student student) {
         List<Course> unmatchedCourses = new ArrayList<Course>(student.getCoursesTaken()); // shallow
                                                                                           // copy
-        // TODO: filter only passing grades
+
+        List<Course> nonPassingCourses = unmatchedCourses.stream()
+                .filter(c -> !Course.isPassingGrade(c.letterGrade)).collect(Collectors.toList());
+
+        unmatchedCourses.removeAll(nonPassingCourses);
+
+        /* Sort, so that we can get the best extra electives to become W */
+        unmatchedCourses.sort((Course c1, Course c2) -> (int) (Course
+                .getGradePointOf(c1.letterGrade) * 2 - Course.getGradePointOf(c2.letterGrade) * 2));
 
         writer.println("Group: General Education");
         writer.println("1. Social Science");
@@ -142,11 +152,11 @@ public class MathStatChecklistReport extends GradChecklistReport {
             printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
         }
         writer.println();
-        
+
         int freeElectiveCredits = 0;
-        writer.println("Group: Free Electives");
+        writer.println("Group: Free Electives (6 credits)");
         do {
-            matchedCredit = matchAndPrintOneElectiveCourse(writer, unmatchedCourses);
+            matchedCredit = matchAndPrintOneFreeElectiveCourse(writer, unmatchedCourses);
             freeElectiveCredits += matchedCredit;
         } while (matchedCredit != 0 && freeElectiveCredits < 6);
         if (freeElectiveCredits < 6) {
@@ -154,13 +164,23 @@ public class MathStatChecklistReport extends GradChecklistReport {
         }
         writer.println();
         
-        writer.println("Total Credit Attempted = " + Course.getCAX(student.getCoursesTaken()));
-        writer.println("Total Credit Granted = " + Course.getCGX(student.getCoursesTaken()));
-        writer.println();
+        /* Re-grade extra free electives to 'W' */
+        for (Course unmatchedCourse : unmatchedCourses) {
+            if (isFreeElective(unmatchedCourse)) {
+                unmatchedCourse.letterGrade = "W (previously " + unmatchedCourse.letterGrade + ")";
+            }
+        }
 
-        writer.println("Group: Extraneous Courses");
+        writer.println("Group: Extra Courses");
         for (Course unmatchedCourse : unmatchedCourses) {
             writer.println(unmatchedCourse);
         }
+        writer.println();
+
+        writer.println("Group: Left-overs");
+        for (Course nonPassingCourse : nonPassingCourses) {
+            writer.println(nonPassingCourse);
+        }
+        writer.println();
     }
 }

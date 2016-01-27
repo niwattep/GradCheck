@@ -21,11 +21,13 @@ public abstract class GradChecklistReport {
     
     public void printReport (PrintWriter writer, Student student) {
         writer.println(student);
-        for (Course course : student.getCoursesTaken()) {
-            writer.println(course);
-        }
-        writer.println("GPAX = " + Course.getGPAX(student.getCoursesTaken()));
-        
+        writer.println();
+
         printCurriculumCourses(writer, student);
+        
+        writer.println("Total Credit Attempted = " + Course.getCAX(student.getCoursesTaken()));
+        writer.println("Total Credit Granted = " + Course.getCGX(student.getCoursesTaken()));
+        writer.println("GPAX = " + Course.getGPAX(student.getCoursesTaken()));
+
     }
 }
