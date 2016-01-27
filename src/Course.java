@@ -88,12 +88,12 @@ public class Course {
     }
     
     public static int getCGX(ArrayList<Course> courses) {
-        int CAX = 0;
+        int CGX = 0;
         for (Course course : courses) {
             if (Course.isGrantedGrade(course.letterGrade)) {
-                CAX += course.credit;
+                CGX += course.credit;
             }
         }
-        return CAX;
+        return CGX;
     }
 }
