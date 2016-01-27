@@ -46,6 +46,23 @@ public class MathStatChecklistReport extends GradChecklistReport {
         return 0;
     }
 
+    private int matchAndPrintOneElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+        List<Course> theCourses = unmatchedCourses
+                .stream()
+                .filter(c -> !c.id.startsWith("26") || c.id.charAt(4) == '0'
+                        || c.id.charAt(4) == '1' || c.id.charAt(4) == '2')
+                .collect(Collectors.toList());
+
+        for (Course theCourse : theCourses) {
+            if (Course.isAttemptableGrade(theCourse.letterGrade)) {
+                writer.println(theCourse);
+                unmatchedCourses.remove(theCourse);
+                return theCourse.credit;
+            }
+        }
+        return 0;
+    }
+
     private void printMissing(PrintWriter writer, String detail) {
         writer.println("   ************** MISSING " + detail + " **************");
     }
@@ -124,7 +141,23 @@ public class MathStatChecklistReport extends GradChecklistReport {
         if (electiveMajorCredits < 15) {
             printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
         }
+        writer.println();
         
+        int freeElectiveCredits = 0;
+        writer.println("Group: Free Electives");
+        do {
+            matchedCredit = matchAndPrintOneElectiveCourse(writer, unmatchedCourses);
+            freeElectiveCredits += matchedCredit;
+        } while (matchedCredit != 0 && freeElectiveCredits < 6);
+        if (freeElectiveCredits < 6) {
+            printMissing(writer, ": NEED " + (6 - freeElectiveCredits) + " MORE CREDITS");
+        }
+        writer.println();
+        
+        writer.println("Total Credit Attempted = " + Course.getCAX(student.getCoursesTaken()));
+        writer.println("Total Credit Granted = " + Course.getCGX(student.getCoursesTaken()));
+        writer.println();
+
         writer.println("Group: Extraneous Courses");
         for (Course unmatchedCourse : unmatchedCourses) {
             writer.println(unmatchedCourse);

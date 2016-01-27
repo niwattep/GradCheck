@@ -76,4 +76,24 @@ public class Course {
         }
         return GPX / CAX;
     }
+    
+    public static int getCAX(ArrayList<Course> courses) {
+        int CAX = 0;
+        for (Course course : courses) {
+            if (Course.isAttemptableGrade(course.letterGrade)) {
+                CAX += course.credit;
+            }
+        }
+        return CAX;
+    }
+    
+    public static int getCGX(ArrayList<Course> courses) {
+        int CAX = 0;
+        for (Course course : courses) {
+            if (Course.isGrantedGrade(course.letterGrade)) {
+                CAX += course.credit;
+            }
+        }
+        return CAX;
+    }
 }
