@@ -5,14 +5,13 @@ import java.util.HashMap;
 public class Course {
     final String id;
     final String name;
-    final int numUnit;
-    final String letterGrade;
+    final int credit;
+    String letterGrade; // can be changed due to the rule about extraneous free electives
 
     private static HashMap<String, Double> gradeTable = new HashMap<String, Double>();
-    private static String[] attemptableGrades = { "A", "B+", "B", "C+", "C",
-            "D+", "D", "F" };
-    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C",
-            "D+", "D", "F", "S", "U" };
+    private static String[] passingGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "S" };
+    private static String[] attemptableGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "F" };
+    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "F", "S", "U" };
 
     static {
         /* setup the static map */
@@ -31,13 +30,17 @@ public class Course {
         super();
         this.id = id;
         this.name = name;
-        this.numUnit = numUnit;
+        this.credit = numUnit;
         this.letterGrade = letterGrade;
     }
-    
+
     public String toString() {
+        String retVal = String.format("   %7s, %20s, %2d, %s", id, name, credit, letterGrade);
+        /*
         return "Course [id=" + id + ", name=" + name + ", numUnit=" + numUnit + ", letterGrade="
                 + letterGrade + "]";
+                */
+        return retVal;
     }
 
     public static double getGradePointOf(String letterGrade) {
@@ -49,6 +52,10 @@ public class Course {
         }
     }
 
+    public static boolean isPassingGrade(String letterGrade) {
+        return Arrays.asList(passingGrades).contains(letterGrade);
+    }
+    
     public static boolean isAttemptableGrade(String letterGrade) {
         return Arrays.asList(attemptableGrades).contains(letterGrade);
     }
@@ -56,25 +63,37 @@ public class Course {
     public static boolean isGrantedGrade(String letterGrade) {
         return Arrays.asList(grantableGrades).contains(letterGrade);
     }
-    
+
     public static double getGPAX(ArrayList<Course> courses) {
         double GPX = 0.0;
         int CAX = 0;
         for (Course course : courses) {
             if (Course.isAttemptableGrade(course.letterGrade)) {
-                CAX += course.numUnit;
+                CAX += course.credit;
                 double gradePoint = getGradePointOf(course.letterGrade);
-                GPX += gradePoint * course.numUnit;
+                GPX += gradePoint * course.credit;
             }
         }
-        System.out.println("CAX = " + CAX);
-        System.out.println("GPX = " + GPX);
         return GPX / CAX;
     }
-
-    public static void main(String[] args) {
-        System.out.println(isAttemptableGrade(new String("U")));
-        System.out.println(isAttemptableGrade("W"));
-        System.out.println(isAttemptableGrade("X"));
+    
+    public static int getCAX(ArrayList<Course> courses) {
+        int CAX = 0;
+        for (Course course : courses) {
+            if (Course.isAttemptableGrade(course.letterGrade)) {
+                CAX += course.credit;
+            }
+        }
+        return CAX;
+    }
+    
+    public static int getCGX(ArrayList<Course> courses) {
+        int CAX = 0;
+        for (Course course : courses) {
+            if (Course.isGrantedGrade(course.letterGrade)) {
+                CAX += course.credit;
+            }
+        }
+        return CAX;
     }
 }
