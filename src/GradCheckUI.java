@@ -15,8 +15,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import org.omg.CORBA.UserException;
-
 public class GradCheckUI implements ActionListener {
     private static GradCheckUI instance = new GradCheckUI();
 

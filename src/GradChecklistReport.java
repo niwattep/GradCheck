@@ -1,5 +1,4 @@
 import java.io.PrintWriter;
-import java.util.ArrayList;
 
 public abstract class GradChecklistReport {
     static String[] humanityGenEdCourseIDs = { "2207363", "2207474", "2502393", "2541152",
