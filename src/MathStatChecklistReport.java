@@ -65,6 +65,27 @@ public class MathStatChecklistReport extends GradChecklistReport {
         return 0;
     }
 
+    /**
+     * Find the first course in unmatchedCourses that has an attemptable grade
+     * (e.g., not S) and remove it from unmatchedCourses.
+     * 
+     * Assumption: Every course in unmatchedCourses has a passing grade.
+     * 
+     * @param writer
+     * @param unmatchedCourses
+     * @return
+     */
+    private int findAndPrintOneCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+        for (Course theCourse : unmatchedCourses) {
+            if (Course.isAttemptableGrade(theCourse.letterGrade)) {
+                writer.println(theCourse);
+                unmatchedCourses.remove(theCourse);
+                return theCourse.credit;
+            }
+        }
+        return 0;
+    }
+
     private void printMissing(PrintWriter writer, String detail) {
         writer.println("   ************** MISSING " + detail + " **************");
     }
@@ -155,15 +176,25 @@ public class MathStatChecklistReport extends GradChecklistReport {
 
         int freeElectiveCredits = 0;
         writer.println("Group: Free Electives (6 credits)");
+        /* First, try to match courses that has to be free electives */
         do {
             matchedCredit = matchAndPrintOneFreeElectiveCourse(writer, unmatchedCourses);
             freeElectiveCredits += matchedCredit;
         } while (matchedCredit != 0 && freeElectiveCredits < 6);
+        
+        /* If free electives hasn't been fulfilled yet, try to match any remaining courses */
+        if (freeElectiveCredits < 6) {
+            do {
+                matchedCredit = findAndPrintOneCourse(writer, unmatchedCourses);
+                freeElectiveCredits += matchedCredit;
+            } while (matchedCredit != 0 && freeElectiveCredits < 6); 
+        }
+        /* Check whether the free electives has been fulfilled */
         if (freeElectiveCredits < 6) {
             printMissing(writer, ": NEED " + (6 - freeElectiveCredits) + " MORE CREDITS");
         }
         writer.println();
-        
+
         /* Re-grade extra free electives to 'W' */
         for (Course unmatchedCourse : unmatchedCourses) {
             if (isFreeElective(unmatchedCourse)) {
