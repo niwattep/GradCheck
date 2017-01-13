@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ApliedStatChecklistReport extends GradChecklistReport {
+public class AppliedStatChecklistReport extends GradChecklistReport {
     private static String[] socialGenEdCourseIDs = { "2900111" };
     private static String[] languageGenEdCourseIDs = { "5500111", "5500112" };
     private static String[] departmentalRequirementCourseIDs = { "2301101", "5500215", "5500216",
