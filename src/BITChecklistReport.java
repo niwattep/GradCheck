@@ -12,9 +12,9 @@ public class BITChecklistReport extends GradChecklistReport {
     private static String[] coreCourseIDs = { "2301102", "2301203", "2301333", "2603172",
             "2603213", "2603244", "2603270", "2603312", "2603313", "2603317", "2603318", "2603417",
             "2603490" };
-    private static String[] coreMajorCourseIDs = { "2601115", "2601116", "2602313", "2603243", "2603335",
-    		"2603346", "2603347", "2603348", "2603349", "2603376", "2603383", "2603441", "2603492",
-    		"2603494", "2604361", "2605311", "3401233" };
+    private static String[] coreMajorCourseIDs = { "2601115", "2601207", "2601255", "2602313", "2603274",
+    		"2603383", "2603385", "2603386", "2603470", "2603471", "2603472", "2603477", "2603479", "2603488", 
+    		"2603493", "2603496" };
     private static String[] programmerCourseIDs = { "2603275", "2603276", "2603277", "2603480", "2603483", "2603484" };
     private static String[] saCourseIDs = { "2603483", "2603484", "2603485", "2603486", "2603487" };
     private static String[] auditCourseIDs = { "2601363", "2603476", "2603483", "2603486", "2603489" };
@@ -162,8 +162,43 @@ public class BITChecklistReport extends GradChecklistReport {
             }
         }
         writer.println();
+        
+        int programmerCredits = 0;
+        int saCredits = 0;
+        int auditCredits = 0;
+        writer.println("Group: Electives Track Courses (>= 15 credits)");
+        int matchedCredit;
+        writer.println("Programmer");
+        do {
+        	matchedCredit = matchAndPrintOneCourse(writer, programmerCourseIDs, unmatchedCourses);
+        	programmerCredits += matchedCredit;
+        } while (matchedCredit != 0);
+        if (programmerCredits < 15) {
+            printMissing(writer, ": NEED " + (15 - programmerCredits) + " MORE CREDITS");
+        }
+        writer.println();
+        
+        writer.println("System Analyst");
+        do {
+        	matchedCredit = matchAndPrintOneCourse(writer, saCourseIDs, unmatchedCourses);
+        	saCredits += matchedCredit;
+        } while (matchedCredit != 0);
+        if (saCredits < 15) {
+            printMissing(writer, ": NEED " + (15 - saCredits) + " MORE CREDITS");
+        }
+        writer.println();
+        
+        writer.println("Computer Audit");
+        do {
+        	matchedCredit = matchAndPrintOneCourse(writer, auditCourseIDs, unmatchedCourses);
+        	auditCredits += matchedCredit;
+        } while (matchedCredit != 0);
+        if (auditCredits < 15) {
+            printMissing(writer, ": NEED " + (15 - auditCredits) + " MORE CREDITS");
+        }
+        writer.println();
 
-        int electiveMajorCredits = 0;
+        /*int electiveMajorCredits = 0;
         writer.println("Group: Elective Major Courses (>= 15 credits)");
         int matchedCredit;
         do {
@@ -173,7 +208,7 @@ public class BITChecklistReport extends GradChecklistReport {
         if (electiveMajorCredits < 15) {
             printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
         }
-        writer.println();
+        writer.println();*/
 
         int freeElectiveCredits = 0;
         writer.println("Group: Free Electives (6 credits)");
