@@ -51,9 +51,27 @@ public class InsuranceChecklistReport extends GradChecklistReport {
         return !course.id.startsWith("26") || course.id.charAt(4) == '0'
                 || course.id.charAt(4) == '1' || course.id.charAt(4) == '2';
     }
+    
+    private boolean isElectiveMojor(Course course) {
+    	return course.id.startsWith("26") && course.id.charAt(4) =='3';
+    }
 
     private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
         List<Course> theCourses = unmatchedCourses.stream().filter(c -> isFreeElective(c))
+                .collect(Collectors.toList());
+
+        for (Course theCourse : theCourses) {
+            if (Course.isAttemptableGrade(theCourse.letterGrade)) {
+                writer.println(theCourse);
+                unmatchedCourses.remove(theCourse);
+                return theCourse.credit;
+            }
+        }
+        return 0;
+    }
+    
+    private int matchAndPrintOneElectiveMojorCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+        List<Course> theCourses = unmatchedCourses.stream().filter(c -> isElectiveMojor(c))
                 .collect(Collectors.toList());
 
         for (Course theCourse : theCourses) {
@@ -170,6 +188,12 @@ public class InsuranceChecklistReport extends GradChecklistReport {
             matchedCredit = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
             electiveMajorCredits += matchedCredit;
         } while (matchedCredit != 0);
+        if (electiveMajorCredits < 15) {
+        	do {
+        		matchedCredit = matchAndPrintOneElectiveMojorCourse(writer, unmatchedCourses);
+        		electiveMajorCredits += matchedCredit;
+        	} while (matchedCredit != 0);
+        }
         if (electiveMajorCredits < 15) {
             printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
         }

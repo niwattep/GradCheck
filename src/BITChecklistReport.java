@@ -18,6 +18,7 @@ public class BITChecklistReport extends GradChecklistReport {
     private static String[] programmerCourseIDs = { "2603275", "2603276", "2603277", "2603480", "2603483", "2603484" };
     private static String[] saCourseIDs = { "2603483", "2603484", "2603485", "2603486", "2603487" };
     private static String[] auditCourseIDs = { "2601363", "2603476", "2603483", "2603486", "2603489" };
+    private static String[] electiveMajorCourseIDs = { };
 
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
