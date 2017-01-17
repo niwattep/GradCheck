@@ -79,6 +79,12 @@ public class BITChecklistReport extends GradChecklistReport {
     	writer.println();
     }
     
+    /**
+     * Calculate credits of programmer
+     * 
+     * @param unmatchedCourses
+     * @return programmerCredits
+     */
     private int programmerComplete(List<Course> unmatchedCourses) {
     	List<Course> programmerCourses = unmatchedCourses
     			.stream()
@@ -93,6 +99,12 @@ public class BITChecklistReport extends GradChecklistReport {
     	return programmerCredits;
     }
     
+    /**
+     * Calculate credits of system analyst
+     * 
+     * @param unmatchedCourses
+     * @return saCredits
+     */
     private int saComplete(List<Course> unmatchedCourses) {
     	List<Course> saCourses = unmatchedCourses
     			.stream()
@@ -107,6 +119,12 @@ public class BITChecklistReport extends GradChecklistReport {
     	return saCredits;
     }
     
+    /**
+     * Calculate credits of computer audit
+     * 
+     * @param unmatchedCourses
+     * @return auditCredits
+     */
     private int auditComplete(List<Course> unmatchedCourses) {
     	List<Course> auditCourses = unmatchedCourses
     			.stream()

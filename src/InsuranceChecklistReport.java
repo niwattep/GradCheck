@@ -55,7 +55,13 @@ public class InsuranceChecklistReport extends GradChecklistReport {
     private boolean isElectiveMojor(Course course) {
     	return course.id.startsWith("26") && course.id.charAt(4) =='3';
     }
-
+    
+    /**
+     * Additional major elective for insurance
+     * @param writer
+     * @param unmatchedCourses
+     * @return
+     */
     private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
         List<Course> theCourses = unmatchedCourses.stream().filter(c -> isFreeElective(c))
                 .collect(Collectors.toList());
