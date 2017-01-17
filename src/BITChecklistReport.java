@@ -15,10 +15,14 @@ public class BITChecklistReport extends GradChecklistReport {
     private static String[] coreMajorCourseIDs = { "2601115", "2601207", "2601255", "2602313", "2603274",
     		"2603383", "2603385", "2603386", "2603470", "2603471", "2603472", "2603477", "2603479", "2603488", 
     		"2603493", "2603496" };
+    
     private static String[] programmerCourseIDs = { "2603275", "2603276", "2603277", "2603480", "2603483", "2603484" };
     private static String[] saCourseIDs = { "2603483", "2603484", "2603485", "2603486", "2603487" };
     private static String[] auditCourseIDs = { "2601363", "2603476", "2603483", "2603486", "2603489" };
-    private static String[] electiveMajorCourseIDs = { };
+    
+    private List<Course> programmerCourses;
+    private List<Course> saCourses;
+    private List<Course> auditCourses;
 
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
@@ -40,13 +44,72 @@ public class BITChecklistReport extends GradChecklistReport {
         for (Course theCourse : theCourses) {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
                 writer.println(theCourse);
+                System.out.println(theCourse);
                 unmatchedCourses.remove(theCourse);
                 return theCourse.credit;
             }
         }
         return 0;
     }
-
+    
+    private int matchAndPrintProgrammerCourses(PrintWriter writer, String[] courseIDs,
+            List<Course> unmatchedCourses) {
+        programmerCourses = unmatchedCourses.stream()
+                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
+        int matchedCredit;
+        int programmerCredits = 0;
+        printCourse(programmerCourses);
+        do {
+        	matchedCredit = matchAndPrintOneCourse(writer, courseIDs, programmerCourses);
+        	programmerCredits += matchedCredit;
+        } while (matchedCredit != 0);
+        return programmerCredits;
+    }
+    
+    private int matchAndPrintSACourses(PrintWriter writer, String[] courseIDs,
+            List<Course> unmatchedCourses) {
+        saCourses = unmatchedCourses.stream()
+                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
+        int matchedCredit;
+        int saCredits = 0;
+        printCourse(saCourses);
+        do {
+        	matchedCredit = matchAndPrintOneCourse(writer, courseIDs, saCourses);
+        	saCredits += matchedCredit;
+        } while (matchedCredit != 0);
+        return saCredits;
+    }
+    
+    private int matchAndPrintAuditCourses(PrintWriter writer, String[] courseIDs,
+            List<Course> unmatchedCourses) {
+        auditCourses = unmatchedCourses.stream()
+                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
+        int matchedCredit;
+        int auditCredits = 0;
+        printCourse(auditCourses);
+        do {
+        	matchedCredit = matchAndPrintOneCourse(writer, courseIDs, auditCourses);
+        	auditCredits += matchedCredit;
+        } while (matchedCredit != 0);
+        return auditCredits;
+    }
+    
+    private void printCourse(List<Course> Courses) {
+    	for (Course c : Courses) {
+    		System.out.println(c.name);
+    	}
+    	System.out.println();
+    }
+    
+    private void removeMatchedCourses(List<Course> unmatchedCourses) {
+    	System.out.println(unmatchedCourses.removeAll(programmerCourses));
+    	printCourse(unmatchedCourses);
+    	unmatchedCourses.removeAll(saCourses);
+    	printCourse(unmatchedCourses);
+    	unmatchedCourses.removeAll(auditCourses);
+    	printCourse(unmatchedCourses);
+    }
+    
     private boolean isFreeElective(Course course) {
         return !course.id.startsWith("26") || course.id.charAt(4) == '0'
                 || course.id.charAt(4) == '1' || course.id.charAt(4) == '2';
@@ -65,7 +128,7 @@ public class BITChecklistReport extends GradChecklistReport {
         }
         return 0;
     }
-
+    
     /**
      * Find the first course in unmatchedCourses that has an attemptable grade
      * (e.g., not S) and remove it from unmatchedCourses.
@@ -169,33 +232,38 @@ public class BITChecklistReport extends GradChecklistReport {
         writer.println("Group: Electives Track Courses (>= 15 credits)");
         int matchedCredit;
         writer.println("Programmer");
-        do {
-        	matchedCredit = matchAndPrintOneCourse(writer, programmerCourseIDs, unmatchedCourses);
-        	programmerCredits += matchedCredit;
-        } while (matchedCredit != 0);
+        programmerCredits = matchAndPrintProgrammerCourses(writer, programmerCourseIDs, unmatchedCourses);
         if (programmerCredits < 15) {
             printMissing(writer, ": NEED " + (15 - programmerCredits) + " MORE CREDITS");
         }
         writer.println();
         
         writer.println("System Analyst");
-        do {
-        	matchedCredit = matchAndPrintOneCourse(writer, saCourseIDs, unmatchedCourses);
-        	saCredits += matchedCredit;
-        } while (matchedCredit != 0);
+        saCredits = matchAndPrintSACourses(writer, saCourseIDs, unmatchedCourses);
         if (saCredits < 15) {
             printMissing(writer, ": NEED " + (15 - saCredits) + " MORE CREDITS");
         }
         writer.println();
         
         writer.println("Computer Audit");
-        do {
-        	matchedCredit = matchAndPrintOneCourse(writer, auditCourseIDs, unmatchedCourses);
-        	auditCredits += matchedCredit;
-        } while (matchedCredit != 0);
+        auditCredits = matchAndPrintAuditCourses(writer, auditCourseIDs, unmatchedCourses);
         if (auditCredits < 15) {
             printMissing(writer, ": NEED " + (15 - auditCredits) + " MORE CREDITS");
         }
+        writer.println();
+        
+        removeMatchedCourses(unmatchedCourses);
+        
+        writer.println("Completed Track(s)");
+        writer.print("Programmer: ");
+        if (programmerCredits >= 15) writer.println("Completed");
+        else writer.println("Not completed");
+        writer.print("System Analyst: ");
+        if (saCredits >= 15) writer.println("Completed");
+        else writer.println("Not completed");
+        writer.print("Computer Audit: ");
+        if (auditCredits >= 15) writer.println("Completed");
+        else writer.println("Not completed");
         writer.println();
 
         /*int electiveMajorCredits = 0;
