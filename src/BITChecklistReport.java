@@ -16,14 +16,12 @@ public class BITChecklistReport extends GradChecklistReport {
     		"2603383", "2603385", "2603386", "2603470", "2603471", "2603472", "2603477", "2603479", "2603488", 
     		"2603493", "2603496" };
     
+    private static String[] electiveMajorCourseIDs = { "2603275", "2603276", "2603277", "2603480", "2603483", "2603484",
+    		"2603485", "2603486", "2603487", "2601363", "2603476", "2603486", "2603489" };
     private static String[] programmerCourseIDs = { "2603275", "2603276", "2603277", "2603480", "2603483", "2603484" };
     private static String[] saCourseIDs = { "2603483", "2603484", "2603485", "2603486", "2603487" };
     private static String[] auditCourseIDs = { "2601363", "2603476", "2603483", "2603486", "2603489" };
     
-    private List<Course> programmerCourses;
-    private List<Course> saCourses;
-    private List<Course> auditCourses;
-
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
      * that has an attemptable grade (e.g., not S) and remove it from
@@ -38,78 +36,91 @@ public class BITChecklistReport extends GradChecklistReport {
      */
     private int matchAndPrintOneCourse(PrintWriter writer, String[] courseIDs,
             List<Course> unmatchedCourses) {
-        List<Course> theCourses = unmatchedCourses.stream()
-                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
+        List<Course> theCourses = unmatchedCourses
+        		.stream()
+                .filter(c -> Arrays.asList(courseIDs).contains(c.id))
+                .collect(Collectors.toList());
 
         for (Course theCourse : theCourses) {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
                 writer.println(theCourse);
-                System.out.println(theCourse);
                 unmatchedCourses.remove(theCourse);
                 return theCourse.credit;
             }
         }
         return 0;
     }
-    
-    private int matchAndPrintProgrammerCourses(PrintWriter writer, String[] courseIDs,
-            List<Course> unmatchedCourses) {
-        programmerCourses = unmatchedCourses.stream()
-                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
-        int matchedCredit;
-        int programmerCredits = 0;
-        printCourse(programmerCourses);
-        do {
-        	matchedCredit = matchAndPrintOneCourse(writer, courseIDs, programmerCourses);
-        	programmerCredits += matchedCredit;
-        } while (matchedCredit != 0);
-        return programmerCredits;
-    }
-    
-    private int matchAndPrintSACourses(PrintWriter writer, String[] courseIDs,
-            List<Course> unmatchedCourses) {
-        saCourses = unmatchedCourses.stream()
-                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
-        int matchedCredit;
-        int saCredits = 0;
-        printCourse(saCourses);
-        do {
-        	matchedCredit = matchAndPrintOneCourse(writer, courseIDs, saCourses);
-        	saCredits += matchedCredit;
-        } while (matchedCredit != 0);
-        return saCredits;
-    }
-    
-    private int matchAndPrintAuditCourses(PrintWriter writer, String[] courseIDs,
-            List<Course> unmatchedCourses) {
-        auditCourses = unmatchedCourses.stream()
-                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
-        int matchedCredit;
-        int auditCredits = 0;
-        printCourse(auditCourses);
-        do {
-        	matchedCredit = matchAndPrintOneCourse(writer, courseIDs, auditCourses);
-        	auditCredits += matchedCredit;
-        } while (matchedCredit != 0);
-        return auditCredits;
-    }
-    
-    private void printCourse(List<Course> Courses) {
-    	for (Course c : Courses) {
-    		System.out.println(c.name);
+    /**
+     * Find completed tracks and print the result
+     * 
+     * @param writer
+     * @param unmatchedCourses
+     */
+    private void checkTrack(PrintWriter writer, List<Course> unmatchedCourses) {
+    	writer.println("Track Result");
+    	int programmerCredits = programmerComplete(unmatchedCourses);
+    	int saCredits = saComplete(unmatchedCourses);
+    	int auditCredits = auditComplete(unmatchedCourses);
+    	if (programmerCredits >= 15) {
+    		writer.println("Programmer: COMPLETE!");
+    	} else {
+    		writer.println("Programmer: NEED " + (15 - programmerCredits) + " MORE CREDITS");
     	}
-    	System.out.println();
+    	if (saCredits >= 15) {
+    		writer.println("System Analyst: Complete");
+    	} else {
+    		writer.println("System Analyst: NEED " + (15 - saCredits) + " MORE CREDITS");
+    	}
+    	if (auditCredits >= 15) {
+    		writer.println("Computer Audit: Complete");
+    	} else {
+    		writer.println("Computer Audit: NEED " + (15 - auditCredits) + " MORE CREDITS");
+    	}
+    	writer.println();
     }
     
-    private void removeMatchedCourses(List<Course> unmatchedCourses) {
-    	System.out.println(unmatchedCourses.removeAll(programmerCourses));
-    	printCourse(unmatchedCourses);
-    	unmatchedCourses.removeAll(saCourses);
-    	printCourse(unmatchedCourses);
-    	unmatchedCourses.removeAll(auditCourses);
-    	printCourse(unmatchedCourses);
+    private int programmerComplete(List<Course> unmatchedCourses) {
+    	List<Course> programmerCourses = unmatchedCourses
+    			.stream()
+    			.filter(c -> Arrays.asList(programmerCourseIDs).contains(c.id))
+    			.collect(Collectors.toList());
+    	int programmerCredits = 0;
+    	for (Course c : programmerCourses) {
+    		if (Course.isAttemptableGrade(c.letterGrade)) {
+    			programmerCredits += c.credit;
+    		}
+    	}
+    	return programmerCredits;
     }
     
+    private int saComplete(List<Course> unmatchedCourses) {
+    	List<Course> saCourses = unmatchedCourses
+    			.stream()
+    			.filter(c -> Arrays.asList(saCourseIDs).contains(c.id))
+    			.collect(Collectors.toList());
+    	int saCredits = 0;
+    	for (Course c : saCourses) {
+    		if (Course.isAttemptableGrade(c.letterGrade)) {
+    			saCredits += c.credit;
+    		}
+    	}
+    	return saCredits;
+    }
+    
+    private int auditComplete(List<Course> unmatchedCourses) {
+    	List<Course> auditCourses = unmatchedCourses
+    			.stream()
+    			.filter(c -> Arrays.asList(auditCourseIDs).contains(c.id))
+    			.collect(Collectors.toList());
+    	int auditCredits = 0;
+    	for (Course c : auditCourses) {
+    		if (Course.isAttemptableGrade(c.letterGrade)) {
+    			auditCredits += c.credit;
+    		}
+    	}
+    	return auditCredits;
+    }
+     
     private boolean isFreeElective(Course course) {
         return !course.id.startsWith("26") || course.id.charAt(4) == '0'
                 || course.id.charAt(4) == '1' || course.id.charAt(4) == '2';
@@ -216,7 +227,7 @@ public class BITChecklistReport extends GradChecklistReport {
             }
         }
         writer.println();
-
+        
         writer.println("Group: Core Major Courses");
         for (String coreMajorCourseID : coreMajorCourseIDs) {
             String[] oneCourse = { coreMajorCourseID };
@@ -226,58 +237,15 @@ public class BITChecklistReport extends GradChecklistReport {
         }
         writer.println();
         
-        int programmerCredits = 0;
-        int saCredits = 0;
-        int auditCredits = 0;
-        writer.println("Group: Electives Track Courses (>= 15 credits)");
-        int matchedCredit;
-        writer.println("Programmer");
-        programmerCredits = matchAndPrintProgrammerCourses(writer, programmerCourseIDs, unmatchedCourses);
-        if (programmerCredits < 15) {
-            printMissing(writer, ": NEED " + (15 - programmerCredits) + " MORE CREDITS");
-        }
+        writer.println("Group: Elective Major Courses");
         writer.println();
-        
-        writer.println("System Analyst");
-        saCredits = matchAndPrintSACourses(writer, saCourseIDs, unmatchedCourses);
-        if (saCredits < 15) {
-            printMissing(writer, ": NEED " + (15 - saCredits) + " MORE CREDITS");
-        }
-        writer.println();
-        
-        writer.println("Computer Audit");
-        auditCredits = matchAndPrintAuditCourses(writer, auditCourseIDs, unmatchedCourses);
-        if (auditCredits < 15) {
-            printMissing(writer, ": NEED " + (15 - auditCredits) + " MORE CREDITS");
-        }
-        writer.println();
-        
-        removeMatchedCourses(unmatchedCourses);
-        
-        writer.println("Completed Track(s)");
-        writer.print("Programmer: ");
-        if (programmerCredits >= 15) writer.println("Completed");
-        else writer.println("Not completed");
-        writer.print("System Analyst: ");
-        if (saCredits >= 15) writer.println("Completed");
-        else writer.println("Not completed");
-        writer.print("Computer Audit: ");
-        if (auditCredits >= 15) writer.println("Completed");
-        else writer.println("Not completed");
-        writer.println();
-
-        /*int electiveMajorCredits = 0;
-        writer.println("Group: Elective Major Courses (>= 15 credits)");
+        checkTrack(writer, unmatchedCourses);
         int matchedCredit;
         do {
             matchedCredit = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
-            electiveMajorCredits += matchedCredit;
         } while (matchedCredit != 0);
-        if (electiveMajorCredits < 15) {
-            printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
-        }
-        writer.println();*/
-
+        writer.println();
+        
         int freeElectiveCredits = 0;
         writer.println("Group: Free Electives (6 credits)");
         /* First, try to match courses that has to be free electives */
@@ -285,7 +253,6 @@ public class BITChecklistReport extends GradChecklistReport {
             matchedCredit = matchAndPrintOneFreeElectiveCourse(writer, unmatchedCourses);
             freeElectiveCredits += matchedCredit;
         } while (matchedCredit != 0 && freeElectiveCredits < 6);
-        
         /* If free electives hasn't been fulfilled yet, try to match any remaining courses */
         if (freeElectiveCredits < 6) {
             do {
@@ -298,7 +265,7 @@ public class BITChecklistReport extends GradChecklistReport {
             printMissing(writer, ": NEED " + (6 - freeElectiveCredits) + " MORE CREDITS");
         }
         writer.println();
-
+        
         /* Re-grade extra free electives to 'W' */
         for (Course unmatchedCourse : unmatchedCourses) {
             if (isFreeElective(unmatchedCourse)) {
