@@ -17,7 +17,7 @@ public class MathStatChecklistReport extends GradChecklistReport {
             "2603436", "2603460", "2603499", "2900112" };
     private static String[] electiveMajorCourseIDs = { "2601255", "2603370", "2603376", "2603383",
             "2603414", "2603437", "2603495", "2301233", "2301336", "2301366", "2301481", "2602395",
-            "2945301", "2945401" };
+            "2945310", "2945401" };
 
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
@@ -47,8 +47,7 @@ public class MathStatChecklistReport extends GradChecklistReport {
     }
 
     private boolean isFreeElective(Course course) {
-        return !course.id.startsWith("26") || course.id.charAt(4) == '0'
-                || course.id.charAt(4) == '1' || course.id.charAt(4) == '2';
+        return !course.id.startsWith("26") || course.id.charAt(4) == '3';
     }
 
     private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {

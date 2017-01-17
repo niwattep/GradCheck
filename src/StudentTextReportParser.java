@@ -93,16 +93,17 @@ public class StudentTextReportParser {
      * @throws IOException
      */
     public static Student parseStudentInfo(BufferedReader reader) throws IOException {
-        for (int i = 0; i < 13; i = i + 1) { // ignore the first 13 lines
-            reader.readLine();
-        }
-
-        String majorCodeLine = reader.readLine(); // 13th line
+    	// Look for the line containing MAJOR CODE (14th line or 15th line)
+    	String line;
+    	do {
+    		line = reader.readLine();
+    	} while (!line.startsWith("MAJOR CODE"));
+    	String majorCodeLine = line;
         String majorCodeString = majorCodeLine.substring(majorCodeLine.length() - 5);
         int majorCode = Integer.valueOf(majorCodeString);
         reader.readLine();
 
-        String studentNameLine = reader.readLine(); // 15th line
+        String studentNameLine = reader.readLine(); // 15th line or 16th line
         String studentName = studentNameLine.substring(13); // ignore prefixes
         reader.readLine();
         reader.readLine();

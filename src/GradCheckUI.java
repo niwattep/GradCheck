@@ -45,7 +45,13 @@ public class GradCheckUI implements ActionListener {
     private static GradChecklistReport getChecklistReport(Student student) {
         if (student.majorCode == 26032) {
             return new MathStatChecklistReport();
-        } else {
+        } else if (student.majorCode == 26033) {
+        	return new AppliedStatChecklistReport();
+        } else if (student.majorCode == 26036) {
+        	return new InsuranceChecklistReport();
+        } else if (student.majorCode == 26034) {
+        	return new BITChecklistReport();
+        }else {
             throw new RuntimeException("Unimplemented major");
         }
     }
