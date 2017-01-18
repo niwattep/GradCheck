@@ -273,14 +273,14 @@ int credits;
         writer.println();
         
         if (canGraduate() == true) {
-        	writer.println("CAN GRADUATE!");
+        	writer.println("***** CAN GRADUATE! *****");
         	/*writer.println(generalCredits);
         	writer.println(coreCredits);
         	writer.println(majorCredits);
         	writer.println(electiveMajorCredits);
         	writer.println(freeElectiveCredits);*/
         } else {
-        	writer.println("CANNOT GRADUATE!");
+        	writer.println("***** CANNOT GRADUATE! *****");
         	/*writer.println(generalCredits);
         	writer.println(coreCredits);
         	writer.println(majorCredits);
