@@ -18,7 +18,13 @@ public class MathStatChecklistReport extends GradChecklistReport {
     private static String[] electiveMajorCourseIDs = { "2601255", "2603370", "2603376", "2603383",
             "2603414", "2603437", "2603495", "2301233", "2301336", "2301366", "2301481", "2602395",
             "2945310", "2945401" };
-
+    
+    private int generalCredits = 0;
+    private int coreCredits = 0;
+    private int majorCredits = 0;
+    private int electiveMajorCredits = 0;
+    private int freeElectiveCredits = 0;
+    
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
      * that has an attemptable grade (e.g., not S) and remove it from
@@ -47,7 +53,8 @@ public class MathStatChecklistReport extends GradChecklistReport {
     }
 
     private boolean isFreeElective(Course course) {
-        return !course.id.startsWith("26") || course.id.charAt(4) == '3';
+        return !course.id.startsWith("26") || (course.id.charAt(4) != '0' &&
+        		course.id.charAt(4) != '1' && course.id.charAt(4) != '2');
     }
 
     private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
@@ -108,27 +115,39 @@ public class MathStatChecklistReport extends GradChecklistReport {
         unmatchedCourses.sort((Course c1, Course c2) -> (int) (Course
                 .getGradePointOf(c1.letterGrade) * 2 - Course.getGradePointOf(c2.letterGrade) * 2));
 
+        int credits;
+        
         writer.println("Group: General Education");
         writer.println("1. Social Science");
-        if (matchAndPrintOneCourse(writer, socialGenEdCourseIDs, unmatchedCourses) == 0) {
+        credits = matchAndPrintOneCourse(writer, socialGenEdCourseIDs, unmatchedCourses);
+        generalCredits += credits;
+        if (credits == 0) {
             printMissing(writer, socialGenEdCourseIDs[0]);
         }
         writer.println("2. Humanity");
-        if (matchAndPrintOneCourse(writer, humanityGenEdCourseIDs, unmatchedCourses) == 0) {
+        credits = matchAndPrintOneCourse(writer, humanityGenEdCourseIDs, unmatchedCourses);
+        generalCredits += credits;
+        if (credits == 0) {
             printMissing(writer, "");
         }
         writer.println("3. Science and Math");
-        if (matchAndPrintOneCourse(writer, scienceMathGenEdCourseIDs, unmatchedCourses) == 0) {
+        credits = matchAndPrintOneCourse(writer, scienceMathGenEdCourseIDs, unmatchedCourses);
+        generalCredits += credits;
+        if (credits == 0) {
             printMissing(writer, "");
         }
         writer.println("4. Interdisciplinary");
-        if (matchAndPrintOneCourse(writer, interdisciplinaryGenEdCourseIDs, unmatchedCourses) == 0) {
+        credits = matchAndPrintOneCourse(writer, interdisciplinaryGenEdCourseIDs, unmatchedCourses);
+        generalCredits += credits;
+        if (credits == 0) {
             printMissing(writer, "");
         }
         writer.println("5. Foreign languages");
         for (String languageGenEdCourseID : languageGenEdCourseIDs) {
             String[] oneCourse = { languageGenEdCourseID };
-            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
+            credits = matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses);
+            generalCredits += credits;
+            if (credits == 0) {
                 printMissing(writer, languageGenEdCourseID);
             }
         }
@@ -137,7 +156,9 @@ public class MathStatChecklistReport extends GradChecklistReport {
         writer.println("Group: Departmental Requirements");
         for (String departmentalRequirementCourseID : departmentalRequirementCourseIDs) {
             String[] oneCourse = { departmentalRequirementCourseID };
-            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
+            credits = matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses);
+            generalCredits += credits;
+            if (credits == 0) {
                 printMissing(writer, departmentalRequirementCourseID);
             }
         }
@@ -146,7 +167,9 @@ public class MathStatChecklistReport extends GradChecklistReport {
         writer.println("Group: Core Courses");
         for (String coreCourseID : coreCourseIDs) {
             String[] oneCourse = { coreCourseID };
-            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
+            credits = matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses);
+            coreCredits += credits;
+            if (credits == 0) {
                 printMissing(writer, coreCourseID);
             }
         }
@@ -155,38 +178,42 @@ public class MathStatChecklistReport extends GradChecklistReport {
         writer.println("Group: Core Major Courses");
         for (String coreMajorCourseID : coreMajorCourseIDs) {
             String[] oneCourse = { coreMajorCourseID };
-            if (matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses) == 0) {
+            credits = matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses);
+            //System.out.println(credits); //test
+            majorCredits += credits;
+            //System.out.println("major " + majorCredits); //test
+            if (credits == 0) {
                 printMissing(writer, coreMajorCourseID);
             }
         }
         writer.println();
 
-        int electiveMajorCredits = 0;
+        //int electiveMajorCredits = 0;
         writer.println("Group: Elective Major Courses (>= 15 credits)");
-        int matchedCredit;
+        //int credits;
         do {
-            matchedCredit = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
-            electiveMajorCredits += matchedCredit;
-        } while (matchedCredit != 0);
+            credits = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
+            electiveMajorCredits += credits;
+        } while (credits != 0);
         if (electiveMajorCredits < 15) {
             printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
         }
         writer.println();
 
-        int freeElectiveCredits = 0;
+        //int freeElectiveCredits = 0;
         writer.println("Group: Free Electives (6 credits)");
         /* First, try to match courses that has to be free electives */
         do {
-            matchedCredit = matchAndPrintOneFreeElectiveCourse(writer, unmatchedCourses);
-            freeElectiveCredits += matchedCredit;
-        } while (matchedCredit != 0 && freeElectiveCredits < 6);
+            credits = matchAndPrintOneFreeElectiveCourse(writer, unmatchedCourses);
+            freeElectiveCredits += credits;
+        } while (credits != 0 && freeElectiveCredits < 6);
         
         /* If free electives hasn't been fulfilled yet, try to match any remaining courses */
         if (freeElectiveCredits < 6) {
             do {
-                matchedCredit = findAndPrintOneCourse(writer, unmatchedCourses);
-                freeElectiveCredits += matchedCredit;
-            } while (matchedCredit != 0 && freeElectiveCredits < 6); 
+                credits = findAndPrintOneCourse(writer, unmatchedCourses);
+                freeElectiveCredits += credits;
+            } while (credits != 0 && freeElectiveCredits < 6); 
         }
         /* Check whether the free electives has been fulfilled */
         if (freeElectiveCredits < 6) {
@@ -212,5 +239,35 @@ public class MathStatChecklistReport extends GradChecklistReport {
             writer.println(nonPassingCourse);
         }
         writer.println();
+        
+        if (canGraduate() == true) {
+        	writer.println("***** CAN GRADUATE! *****");
+        	/*writer.println(generalCredits);
+        	writer.println(coreCredits);
+        	writer.println(majorCredits);
+        	writer.println(electiveMajorCredits);
+        	writer.println(freeElectiveCredits);*/
+        } else {
+        	writer.println("***** CANNOT GRADUATE! *****");
+        	/*writer.println(generalCredits);
+        	writer.println(coreCredits);
+        	writer.println(majorCredits);
+        	writer.println(electiveMajorCredits);
+        	writer.println(freeElectiveCredits);*/
+        }
+        writer.println();
+    }
+    
+    /**
+     * Check if this student can graduate or not
+     * 
+     * @return true if this student can graduate
+     */
+    private boolean canGraduate() {
+    	if (generalCredits == 32 && coreCredits == 42 && majorCredits == 48 &&
+    			electiveMajorCredits >= 15 && freeElectiveCredits == 6) {
+    		return true;
+    	}
+    	return false;
     }
 }

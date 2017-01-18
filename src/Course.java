@@ -9,9 +9,9 @@ public class Course {
     String letterGrade; // can be changed due to the rule about extraneous free electives
 
     private static HashMap<String, Double> gradeTable = new HashMap<String, Double>();
-    private static String[] passingGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "S" };
+    private static String[] passingGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "S", "V" };
     private static String[] attemptableGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "F" };
-    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "F", "S", "U" };
+    private static String[] grantableGrades = { "A", "B+", "B", "C+", "C", "D+", "D", "F", "S", "U", "V" };
 
     static {
         /* setup the static map */
