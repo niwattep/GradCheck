@@ -53,7 +53,8 @@ public class MathStatChecklistReport extends GradChecklistReport {
     }
 
     private boolean isFreeElective(Course course) {
-        return !course.id.startsWith("26") || course.id.charAt(4) == '3';
+        return !course.id.startsWith("26") || (course.id.charAt(4) != '0' &&
+        		course.id.charAt(4) != '1' && course.id.charAt(4) != '2');
     }
 
     private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
