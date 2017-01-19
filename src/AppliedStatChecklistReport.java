@@ -25,6 +25,8 @@ public class AppliedStatChecklistReport extends GradChecklistReport {
     private int electiveMajorCredits = 0;
     private int freeElectiveCredits = 0;
     
+    private boolean haveNonpassingCourse = false;
+
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
      * that has an attemptable grade (e.g., not S) and remove it from
@@ -110,12 +112,19 @@ public class AppliedStatChecklistReport extends GradChecklistReport {
                 .filter(c -> !Course.isPassingGrade(c.letterGrade)).collect(Collectors.toList());
 
         unmatchedCourses.removeAll(nonPassingCourses);
+        
+        for (Course nonPass : nonPassingCourses) {
+        	if (nonPass.letterGrade.equals("F") || nonPass.letterGrade.equals("U")) {
+        		haveNonpassingCourse = true;
+        		break;
+        	}
+        }
 
         /* Sort, so that we can get the best extra electives to become W */
         unmatchedCourses.sort((Course c1, Course c2) -> (int) (Course
                 .getGradePointOf(c1.letterGrade) * 2 - Course.getGradePointOf(c2.letterGrade) * 2));
 
-int credits;
+        int credits;
         
         writer.println("Group: General Education");
         writer.println("1. Social Science");
@@ -240,6 +249,14 @@ int credits;
         }
         writer.println();
         
+        int totalCreditAttemped = Course.getCAX(student.getCoursesTaken());
+        int totalCreditGranted = Course.getCGX(student.getCoursesTaken());
+        double gpax = Course.getGPAX(student.getCoursesTaken());
+        writer.println("Total Credit Attempted = " + totalCreditAttemped);
+        writer.println("Total Credit Granted = " + totalCreditGranted);
+        writer.println("GPAX = " + gpax);
+        writer.println();
+        
         if (canGraduate() == true) {
         	writer.println("***** CAN GRADUATE! *****");
         	/*writer.println(generalCredits);
@@ -247,6 +264,10 @@ int credits;
         	writer.println(majorCredits);
         	writer.println(electiveMajorCredits);
         	writer.println(freeElectiveCredits);*/
+        	if (haveNonpassingCourse == false) {
+        		if (gpax >= 3.60) writer.println("*****<>------First-class honors------<>*****");
+        		else if (gpax >= 3.25) writer.println("**<>---Second-class honors---<>**");
+        	}
         } else {
         	writer.println("***** CANNOT GRADUATE! *****");
         	/*writer.println(generalCredits);

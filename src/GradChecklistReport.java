@@ -24,9 +24,9 @@ public abstract class GradChecklistReport {
 
         printCurriculumCourses(writer, student);
         
-        writer.println("Total Credit Attempted = " + Course.getCAX(student.getCoursesTaken()));
+        /*writer.println("Total Credit Attempted = " + Course.getCAX(student.getCoursesTaken()));
         writer.println("Total Credit Granted = " + Course.getCGX(student.getCoursesTaken()));
-        writer.println("GPAX = " + Course.getGPAX(student.getCoursesTaken()));
+        writer.println("GPAX = " + Course.getGPAX(student.getCoursesTaken()));*/
 
     }
 }
