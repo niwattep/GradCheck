@@ -234,7 +234,8 @@ public class InsuranceChecklistReport extends GradChecklistReport {
         	do {
         		credits = matchAndPrintOneElectiveMojorCourse(writer, unmatchedCourses);
         		electiveMajorCredits += credits;
-        	} while (credits != 0);
+        		if (credits == 0) break;
+        	} while (electiveMajorCredits < 15);
         }
         if (electiveMajorCredits < 15) {
             printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
