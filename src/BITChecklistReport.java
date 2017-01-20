@@ -283,9 +283,7 @@ public class BITChecklistReport extends GradChecklistReport {
         for (String coreMajorCourseID : coreMajorCourseIDs) {
             String[] oneCourse = { coreMajorCourseID };
             credits = matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses);
-            //System.out.println(credits); //test
             majorCredits += credits;
-            //System.out.println("major " + majorCredits); //test
             if (credits == 0) {
                 printMissing(writer, coreMajorCourseID);
             }

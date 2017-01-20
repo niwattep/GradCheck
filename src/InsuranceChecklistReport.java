@@ -214,18 +214,14 @@ public class InsuranceChecklistReport extends GradChecklistReport {
         for (String coreMajorCourseID : coreMajorCourseIDs) {
             String[] oneCourse = { coreMajorCourseID };
             credits = matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses);
-            //System.out.println(credits); //test
             majorCredits += credits;
-            //System.out.println("major " + majorCredits); //test
             if (credits == 0) {
                 printMissing(writer, coreMajorCourseID);
             }
         }
         writer.println();
 
-        //int electiveMajorCredits = 0;
         writer.println("Group: Elective Major Courses (>= 15 credits)");
-        //int matchedCredit;
         do {
             credits = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
             electiveMajorCredits += credits;
