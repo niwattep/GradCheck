@@ -107,7 +107,7 @@ public class AppliedStatChecklistReport extends GradChecklistReport {
     public void printCurriculumCourses(PrintWriter writer, Student student) {
         List<Course> unmatchedCourses = new ArrayList<Course>(student.getCoursesTaken()); // shallow
                                                                                           // copy
-
+        
         List<Course> nonPassingCourses = unmatchedCourses.stream()
                 .filter(c -> !Course.isPassingGrade(c.letterGrade)).collect(Collectors.toList());
 
