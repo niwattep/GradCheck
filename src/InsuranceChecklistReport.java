@@ -61,8 +61,8 @@ public class InsuranceChecklistReport extends GradChecklistReport {
     }
     
     private boolean isElectiveMojor(Course course) {
-    	return course.id.startsWith("26") || course.id.charAt(4) != '0' || 
-        		course.id.charAt(4) != '1' || course.id.charAt(4) != '2';
+    	return course.id.startsWith("26") && (course.id.charAt(4) != '0' && 
+        		course.id.charAt(4) != '1' && course.id.charAt(4) != '2');
     }
     
     /**
