@@ -188,18 +188,14 @@ public class MathStatChecklistReport extends GradChecklistReport {
         for (String coreMajorCourseID : coreMajorCourseIDs) {
             String[] oneCourse = { coreMajorCourseID };
             credits = matchAndPrintOneCourse(writer, oneCourse, unmatchedCourses);
-            //System.out.println(credits); //test
             majorCredits += credits;
-            //System.out.println("major " + majorCredits); //test
             if (credits == 0) {
                 printMissing(writer, coreMajorCourseID);
             }
         }
         writer.println();
 
-        //int electiveMajorCredits = 0;
         writer.println("Group: Elective Major Courses (>= 15 credits)");
-        //int credits;
         do {
             credits = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
             electiveMajorCredits += credits;
@@ -209,7 +205,6 @@ public class MathStatChecklistReport extends GradChecklistReport {
         }
         writer.println();
 
-        //int freeElectiveCredits = 0;
         writer.println("Group: Free Electives (6 credits)");
         /* First, try to match courses that has to be free electives */
         do {
@@ -259,11 +254,6 @@ public class MathStatChecklistReport extends GradChecklistReport {
         
         if (canGraduate() == true) {
         	writer.println("***** CAN GRADUATE! *****");
-        	/*writer.println(generalCredits);
-        	writer.println(coreCredits);
-        	writer.println(majorCredits);
-        	writer.println(electiveMajorCredits);
-        	writer.println(freeElectiveCredits);*/
         	if (haveNonpassingCourse == false) {
         		System.out.println("here");
         		if (gpax >= 3.60) writer.println("*****<>------First-class honors------<>*****");
@@ -271,11 +261,6 @@ public class MathStatChecklistReport extends GradChecklistReport {
         	}
         } else {
         	writer.println("***** CANNOT GRADUATE! *****");
-        	/*writer.println(generalCredits);
-        	writer.println(coreCredits);
-        	writer.println(majorCredits);
-        	writer.println(electiveMajorCredits);
-        	writer.println(freeElectiveCredits);*/
         }
         writer.println();
     }
