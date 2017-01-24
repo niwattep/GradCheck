@@ -255,7 +255,6 @@ public class MathStatChecklistReport extends GradChecklistReport {
         if (canGraduate() == true) {
         	writer.println("***** CAN GRADUATE! *****");
         	if (haveNonpassingCourse == false) {
-        		System.out.println("here");
         		if (gpax >= 3.60) writer.println("***** FIRST-CLASS HONORS *****");
         		else if (gpax >= 3.25) writer.println("***** SECOND-CLASS HONORS *****");
         	}
