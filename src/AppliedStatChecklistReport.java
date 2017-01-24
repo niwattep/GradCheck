@@ -255,8 +255,8 @@ public class AppliedStatChecklistReport extends GradChecklistReport {
         if (canGraduate() == true) {
         	writer.println("***** CAN GRADUATE! *****");
         	if (haveNonpassingCourse == false) {
-        		if (gpax >= 3.60) writer.println("*****<>------First-class honors------<>*****");
-        		else if (gpax >= 3.25) writer.println("**<>---Second-class honors---<>**");
+        		if (gpax >= 3.60) writer.println("***** FIRST-CLASS HONORS *****");
+        		else if (gpax >= 3.25) writer.println("***** SECOND-CLASS HONORS *****");
         	}
         } else {
         	writer.println("***** CANNOT GRADUATE! *****");
