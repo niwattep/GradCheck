@@ -16,9 +16,9 @@ public class BITChecklistReport extends GradChecklistReport {
     		"2603383", "2603385", "2603386", "2603470", "2603471", "2603472", "2603477", "2603479", "2603488", 
     		"2603493", "2603496" };
     
-    private static String[] electiveMajorCourseIDs = { "2603275", "2603276", "2603277", "2603480", "2603483", "2603484",
+    private static String[] electiveMajorCourseIDs = { "2603275", "2603276", "2603277", "2603491", "2603483", "2603484",
     		"2603485", "2603486", "2603487", "2601363", "2603476", "2603486", "2603489" };
-    private static String[] programmerCourseIDs = { "2603275", "2603276", "2603277", "2603480", "2603483", "2603484" };
+    private static String[] programmerCourseIDs = { "2603275", "2603276", "2603277", "2603491", "2603483", "2603484" };
     private static String[] saCourseIDs = { "2603483", "2603484", "2603485", "2603486", "2603487" };
     private static String[] auditCourseIDs = { "2601363", "2603476", "2603483", "2603486", "2603489" };
     
@@ -28,7 +28,14 @@ public class BITChecklistReport extends GradChecklistReport {
     private int programmerCredits = 0;
     private int saCredits = 0;
     private int auditCredits = 0;
-    private int freeElectiveCredits = 0;
+    private int freeElectiveCredits = 0; 
+    private int electiveMajorCredits = 0;
+    
+    private List<Course> programmerCourses;
+    private List<Course> saCourses;
+    private List<Course> auditCourses;
+    private List<Course> freeElectiveCourses = new ArrayList<Course>();
+    private List<Course> electiveMajorCourses = new ArrayList<Course>();
     
     private boolean haveNonpassingCourse = false;
     
@@ -60,17 +67,40 @@ public class BITChecklistReport extends GradChecklistReport {
         }
         return 0;
     }
+    
     /**
-     * Find completed tracks and print the result
+     * Match one elective major course that is in electiveMajorCourseIDs
+     * @param writer
+     * @param courseIDs
+     * @param unmatchedCourses
+     * @return course credits. 0 if no course matched
+     */
+    private int matchOneElectiveMajorCourse(PrintWriter writer, String[] courseIDs,
+            List<Course> unmatchedCourses) {
+        List<Course> theCourses = unmatchedCourses.stream()
+                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
+
+        for (Course theCourse : theCourses) {
+            if (Course.isAttemptableGrade(theCourse.letterGrade)) {
+            	electiveMajorCourses.add(theCourse);
+                unmatchedCourses.remove(theCourse);
+                return theCourse.credit;
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Find completed tracks
      * 
      * @param writer
      * @param unmatchedCourses
      */
     private void checkTrack(PrintWriter writer, List<Course> unmatchedCourses) {
     	writer.println("Track Result");
-    	programmerCredits = programmerComplete(unmatchedCourses);
-    	saCredits = saComplete(unmatchedCourses);
-    	auditCredits = auditComplete(unmatchedCourses);
+    	programmerComplete(unmatchedCourses);
+    	saComplete(unmatchedCourses);
+    	auditComplete(unmatchedCourses);
     	if (programmerCredits >= 15) {
     		writer.println("Programmer: ***** COMPLETE! *****");
     	} else {
@@ -95,18 +125,16 @@ public class BITChecklistReport extends GradChecklistReport {
      * @param unmatchedCourses
      * @return programmerCredits
      */
-    private int programmerComplete(List<Course> unmatchedCourses) {
-    	List<Course> programmerCourses = unmatchedCourses
+    private void programmerComplete(List<Course> unmatchedCourses) {
+    	programmerCourses = unmatchedCourses
     			.stream()
     			.filter(c -> Arrays.asList(programmerCourseIDs).contains(c.id))
     			.collect(Collectors.toList());
-    	int programmerCredits = 0;
     	for (Course c : programmerCourses) {
     		if (Course.isAttemptableGrade(c.letterGrade)) {
     			programmerCredits += c.credit;
     		}
     	}
-    	return programmerCredits;
     }
     
     /**
@@ -115,18 +143,16 @@ public class BITChecklistReport extends GradChecklistReport {
      * @param unmatchedCourses
      * @return saCredits
      */
-    private int saComplete(List<Course> unmatchedCourses) {
-    	List<Course> saCourses = unmatchedCourses
+    private void saComplete(List<Course> unmatchedCourses) {
+    	saCourses = unmatchedCourses
     			.stream()
     			.filter(c -> Arrays.asList(saCourseIDs).contains(c.id))
     			.collect(Collectors.toList());
-    	int saCredits = 0;
     	for (Course c : saCourses) {
     		if (Course.isAttemptableGrade(c.letterGrade)) {
     			saCredits += c.credit;
     		}
     	}
-    	return saCredits;
     }
     
     /**
@@ -135,37 +161,36 @@ public class BITChecklistReport extends GradChecklistReport {
      * @param unmatchedCourses
      * @return auditCredits
      */
-    private int auditComplete(List<Course> unmatchedCourses) {
-    	List<Course> auditCourses = unmatchedCourses
+    private void auditComplete(List<Course> unmatchedCourses) {
+    	auditCourses = unmatchedCourses
     			.stream()
     			.filter(c -> Arrays.asList(auditCourseIDs).contains(c.id))
     			.collect(Collectors.toList());
-    	int auditCredits = 0;
     	for (Course c : auditCourses) {
     		if (Course.isAttemptableGrade(c.letterGrade)) {
     			auditCredits += c.credit;
     		}
     	}
-    	return auditCredits;
     }
-     
-    /*private boolean isFreeElective(Course course) {
-        return !course.id.startsWith("26") || (course.id.charAt(4) != '0' &&
-        		course.id.charAt(4) != '1' && course.id.charAt(4) != '2');
-    }*/
-    
+      
     private boolean isFreeElective(Course course) {
         return !course.id.startsWith("26") || course.id.charAt(4) == '0'
                 || course.id.charAt(4) == '1' || course.id.charAt(4) == '2';
     }
 
-    private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+    /**
+     * Match free elctive
+     * @param writer
+     * @param unmatchedCourses
+     * @return course credits. 0 if no course matched
+     */
+    private int matchOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
         List<Course> theCourses = unmatchedCourses.stream().filter(c -> isFreeElective(c))
                 .collect(Collectors.toList());
 
         for (Course theCourse : theCourses) {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
-                writer.println(theCourse);
+            	freeElectiveCourses.add(theCourse);
                 unmatchedCourses.remove(theCourse);
                 return theCourse.credit;
             }
@@ -174,19 +199,35 @@ public class BITChecklistReport extends GradChecklistReport {
     }
     
     /**
+     * If free elective is not fulfilled and elective major course credits is more than 15
+     * move some elective major courses to free elective course
+     */
+    private void moveElectiveMajorToFreeElective() {
+    	do {
+    		Course movingCourse = electiveMajorCourses.remove(0);
+            electiveMajorCourses.remove(movingCourse);
+            electiveMajorCredits -= movingCourse.credit;
+            freeElectiveCourses.add(movingCourse);
+            freeElectiveCredits += movingCourse.credit;
+    	} while (electiveMajorCredits > 15 && freeElectiveCredits < 6);
+    }
+
+    /**
      * Find the first course in unmatchedCourses that has an attemptable grade
      * (e.g., not S) and remove it from unmatchedCourses.
+     * 
+     * Use for free elective only
      * 
      * Assumption: Every course in unmatchedCourses has a passing grade.
      * 
      * @param writer
      * @param unmatchedCourses
-     * @return
+     * @return course credits. 0 if no course matched
      */
-    private int findAndPrintOneCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+    private int findOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
         for (Course theCourse : unmatchedCourses) {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
-                writer.println(theCourse);
+            	freeElectiveCourses.add(theCourse);
                 unmatchedCourses.remove(theCourse);
                 return theCourse.credit;
             }
@@ -295,33 +336,45 @@ public class BITChecklistReport extends GradChecklistReport {
         }
         writer.println();
         
-        writer.println("Group: Elective Major Courses");
-        writer.println();
         checkTrack(writer, unmatchedCourses);
+        
         do {
-            credits = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
+            credits = matchOneElectiveMajorCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
+            electiveMajorCredits += credits;
         } while (credits != 0);
         writer.println();
         
-        writer.println("Group: Free Electives (6 credits)");
-        /* First, try to match courses that has to be free electives */
         do {
-            credits = matchAndPrintOneFreeElectiveCourse(writer, unmatchedCourses);
+            credits = matchOneFreeElectiveCourse(writer, unmatchedCourses);
             freeElectiveCredits += credits;
         } while (credits != 0 && freeElectiveCredits < 6);
-        /* If free electives hasn't been fulfilled yet, try to match any remaining courses */
         if (freeElectiveCredits < 6) {
             do {
-                credits = findAndPrintOneCourse(writer, unmatchedCourses);
+                credits = findOneFreeElectiveCourse(writer, unmatchedCourses);
                 freeElectiveCredits += credits;
             } while (credits != 0 && freeElectiveCredits < 6); 
         }
-        /* Check whether the free electives has been fulfilled */
+        if (freeElectiveCredits < 6 && electiveMajorCredits > 15) {
+        	moveElectiveMajorToFreeElective();
+        }
+        writer.println("Group: Elective Major Courses (>= 15 credits)");
+        for (Course theCourse : electiveMajorCourses) {
+        	writer.println(theCourse);
+        }
+        if (electiveMajorCredits < 15) {
+        	printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
+    	}
+        writer.println();
+        
+        writer.println("Group: Free Electives (6 credits)");
+        for (Course theCourse : freeElectiveCourses) {
+        	writer.println(theCourse);
+        }
         if (freeElectiveCredits < 6) {
             printMissing(writer, ": NEED " + (6 - freeElectiveCredits) + " MORE CREDITS");
         }
         writer.println();
-        
+
         /* Re-grade extra free electives to 'W' */
         for (Course unmatchedCourse : unmatchedCourses) {
             if (isFreeElective(unmatchedCourse)) {
@@ -346,7 +399,7 @@ public class BITChecklistReport extends GradChecklistReport {
         double gpax = Course.getGPAX(student.getCoursesTaken());
         writer.println("Total Credit Attempted = " + totalCreditAttemped);
         writer.println("Total Credit Granted = " + totalCreditGranted);
-        writer.println("GPAX = " + gpax);
+        writer.println("GPAX = " + (Math.round(gpax * 100.0) / 100.0));
         writer.println();
         
         if (canGraduate() == true) {

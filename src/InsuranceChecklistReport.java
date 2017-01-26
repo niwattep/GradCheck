@@ -27,7 +27,10 @@ public class InsuranceChecklistReport extends GradChecklistReport {
     private int freeElectiveCredits = 0;
     
     private boolean haveNonpassingCourse = false;
-
+    
+    private List<Course> electiveMajorCourses = new ArrayList<Course>();
+    private List<Course> freeElectiveCourses = new ArrayList<Course>();
+    
     /**
      * Match the first course in courseIDs with a course in unmatchedCourses
      * that has an attemptable grade (e.g., not S) and remove it from
@@ -47,18 +50,55 @@ public class InsuranceChecklistReport extends GradChecklistReport {
 
         for (Course theCourse : theCourses) {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
-                writer.println(theCourse);
+            	writer.println(theCourse);
                 unmatchedCourses.remove(theCourse);
                 return theCourse.credit;
             }
         }
         return 0;
     }
+    
+    /**
+     * Match one elective major course that is in electiveMajorCourseIDs
+     * @param writer
+     * @param courseIDs
+     * @param unmatchedCourses
+     * @return course credits. 0 if no course matched
+     */
+    private int matchOneElectiveMajorCourse(PrintWriter writer, String[] courseIDs,
+            List<Course> unmatchedCourses) {
+        List<Course> theCourses = unmatchedCourses.stream()
+                .filter(c -> Arrays.asList(courseIDs).contains(c.id)).collect(Collectors.toList());
 
-    /*private boolean isFreeElective(Course course) {
-        return !course.id.startsWith("26") || (course.id.charAt(4) != '0' &&
-        		course.id.charAt(4) != '1' && course.id.charAt(4) != '2');
-    }*/
+        for (Course theCourse : theCourses) {
+            if (Course.isAttemptableGrade(theCourse.letterGrade)) {
+            	electiveMajorCourses.add(theCourse);
+                unmatchedCourses.remove(theCourse);
+                return theCourse.credit;
+            }
+        }
+        return 0;
+    }
+    
+    /**
+     * Match other course that can be elective major for insurance
+     * @param writer
+     * @param unmatchedCourses
+     * @return course credits. 0 if no course matched
+     */
+    private int matchOneElectiveMajorCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+        List<Course> theCourses = unmatchedCourses.stream().filter(c -> isElectiveMojor(c))
+                .collect(Collectors.toList());
+
+        for (Course theCourse : theCourses) {
+            if (Course.isAttemptableGrade(theCourse.letterGrade)) {
+            	electiveMajorCourses.add(theCourse);
+                unmatchedCourses.remove(theCourse);
+                return theCourse.credit;
+            }
+        }
+        return 0;
+    }
     
     private boolean isFreeElective(Course course) {
         return !course.id.startsWith("26") || course.id.charAt(4) == '0'
@@ -71,18 +111,18 @@ public class InsuranceChecklistReport extends GradChecklistReport {
     }
     
     /**
-     * Additional major elective for insurance
+     * Match free elctive
      * @param writer
      * @param unmatchedCourses
-     * @return
+     * @return course credits. 0 if no course matched
      */
-    private int matchAndPrintOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+    private int matchOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
         List<Course> theCourses = unmatchedCourses.stream().filter(c -> isFreeElective(c))
                 .collect(Collectors.toList());
 
         for (Course theCourse : theCourses) {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
-                writer.println(theCourse);
+            	freeElectiveCourses.add(theCourse);
                 unmatchedCourses.remove(theCourse);
                 return theCourse.credit;
             }
@@ -90,34 +130,37 @@ public class InsuranceChecklistReport extends GradChecklistReport {
         return 0;
     }
     
-    private int matchAndPrintOneElectiveMojorCourse(PrintWriter writer, List<Course> unmatchedCourses) {
-        List<Course> theCourses = unmatchedCourses.stream().filter(c -> isElectiveMojor(c))
-                .collect(Collectors.toList());
 
-        for (Course theCourse : theCourses) {
-            if (Course.isAttemptableGrade(theCourse.letterGrade)) {
-                writer.println(theCourse);
-                unmatchedCourses.remove(theCourse);
-                return theCourse.credit;
-            }
-        }
-        return 0;
+    /**
+     * If free elective is not fulfilled and elective major course credits is more than 15
+     * move some elective major courses to free elective course
+     */
+    private void moveElectiveMajorToFreeElective() {
+    	do {
+    		Course movingCourse = electiveMajorCourses.remove(0);
+            electiveMajorCourses.remove(movingCourse);
+            electiveMajorCredits -= movingCourse.credit;
+            freeElectiveCourses.add(movingCourse);
+            freeElectiveCredits += movingCourse.credit;
+    	} while (electiveMajorCredits > 15 && freeElectiveCredits < 6);
     }
 
     /**
      * Find the first course in unmatchedCourses that has an attemptable grade
      * (e.g., not S) and remove it from unmatchedCourses.
      * 
+     * Use for free elective only
+     * 
      * Assumption: Every course in unmatchedCourses has a passing grade.
      * 
      * @param writer
      * @param unmatchedCourses
-     * @return
+     * @return course credits. 0 if no course matched
      */
-    private int findAndPrintOneCourse(PrintWriter writer, List<Course> unmatchedCourses) {
+    private int findOneFreeElectiveCourse(PrintWriter writer, List<Course> unmatchedCourses) {
         for (Course theCourse : unmatchedCourses) {
             if (Course.isAttemptableGrade(theCourse.letterGrade)) {
-                writer.println(theCourse);
+            	freeElectiveCourses.add(theCourse);
                 unmatchedCourses.remove(theCourse);
                 return theCourse.credit;
             }
@@ -226,43 +269,49 @@ public class InsuranceChecklistReport extends GradChecklistReport {
         }
         writer.println();
 
-        writer.println("Group: Elective Major Courses (>= 15 credits)");
         do {
-            credits = matchAndPrintOneCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
+            credits = matchOneElectiveMajorCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
             electiveMajorCredits += credits;
         } while (credits != 0);
         if (electiveMajorCredits < 15) {
         	do {
-        		credits = matchAndPrintOneElectiveMojorCourse(writer, unmatchedCourses);
+        		credits = matchOneElectiveMajorCourse(writer, unmatchedCourses);
         		electiveMajorCredits += credits;
-        		if (credits == 0) break;
-        	} while (electiveMajorCredits < 15);
-        }
-        if (electiveMajorCredits < 15) {
-            printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
+        	} while (credits != 0);
         }
         writer.println();
-
-        writer.println("Group: Free Electives (6 credits)");
-        /* First, try to match courses that has to be free electives */
+        
         do {
-            credits = matchAndPrintOneFreeElectiveCourse(writer, unmatchedCourses);
+            credits = matchOneFreeElectiveCourse(writer, unmatchedCourses);
             freeElectiveCredits += credits;
         } while (credits != 0 && freeElectiveCredits < 6);
-        
-        /* If free electives hasn't been fulfilled yet, try to match any remaining courses */
         if (freeElectiveCredits < 6) {
             do {
-                credits = findAndPrintOneCourse(writer, unmatchedCourses);
+                credits = findOneFreeElectiveCourse(writer, unmatchedCourses);
                 freeElectiveCredits += credits;
             } while (credits != 0 && freeElectiveCredits < 6); 
         }
-        /* Check whether the free electives has been fulfilled */
+        if (freeElectiveCredits < 6 && electiveMajorCredits > 15) {
+        	moveElectiveMajorToFreeElective();
+        }
+        writer.println("Group: Elective Major Courses (>= 15 credits)");
+        for (Course theCourse : electiveMajorCourses) {
+        	writer.println(theCourse);
+        }
+        if (electiveMajorCredits < 15) {
+        	printMissing(writer, ": NEED " + (15 - electiveMajorCredits) + " MORE CREDITS");
+    	}
+        writer.println();
+        
+        writer.println("Group: Free Electives (6 credits)");
+        for (Course theCourse : freeElectiveCourses) {
+        	writer.println(theCourse);
+        }
         if (freeElectiveCredits < 6) {
             printMissing(writer, ": NEED " + (6 - freeElectiveCredits) + " MORE CREDITS");
         }
         writer.println();
-
+        
         /* Re-grade extra free electives to 'W' */
         for (Course unmatchedCourse : unmatchedCourses) {
             if (isFreeElective(unmatchedCourse)) {
@@ -287,7 +336,7 @@ public class InsuranceChecklistReport extends GradChecklistReport {
         double gpax = Course.getGPAX(student.getCoursesTaken());
         writer.println("Total Credit Attempted = " + totalCreditAttemped);
         writer.println("Total Credit Granted = " + totalCreditGranted);
-        writer.println("GPAX = " + gpax);
+        writer.println("GPAX = " + (Math.round(gpax * 100.0) / 100.0));
         writer.println();
         
         if (canGraduate() == true) {
