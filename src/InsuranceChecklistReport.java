@@ -142,7 +142,8 @@ public class InsuranceChecklistReport extends GradChecklistReport {
             electiveMajorCredits -= movingCourse.credit;
             freeElectiveCourses.add(movingCourse);
             freeElectiveCredits += movingCourse.credit;
-    	} while (electiveMajorCredits > 15 && freeElectiveCredits < 6);
+            if (freeElectiveCredits == 6) break;
+    	} while (electiveMajorCredits > 15);
     }
 
     /**
@@ -273,12 +274,10 @@ public class InsuranceChecklistReport extends GradChecklistReport {
             credits = matchOneElectiveMajorCourse(writer, electiveMajorCourseIDs, unmatchedCourses);
             electiveMajorCredits += credits;
         } while (credits != 0);
-        if (electiveMajorCredits < 15) {
-        	do {
-        		credits = matchOneElectiveMajorCourse(writer, unmatchedCourses);
-        		electiveMajorCredits += credits;
-        	} while (credits != 0);
-        }
+        do {
+        	credits = matchOneElectiveMajorCourse(writer, unmatchedCourses);
+        	electiveMajorCredits += credits;
+        } while (credits != 0);
         writer.println();
         
         do {
